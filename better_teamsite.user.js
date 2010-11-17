@@ -6,9 +6,6 @@
 // @include       https://*/iw-cc/*
 // ==/UserScript==
 //
-// - remove log
-// - parameterize '/templatedata'
-// - figure out the back button issue, window open issue 
 window.addEventListener("load", main, false);
 
 function main() {
