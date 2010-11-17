@@ -2,7 +2,6 @@
 // @name          javatart.com's better teamsite 
 // @namespace     http://www.javatarts.com
 // @description   Adds links to browse to other teamsite pages. 
-// @include       *
 // @include       http://*/iw-cc/*
 // @include       https://*/iw-cc/*
 // ==/UserScript==
@@ -14,29 +13,23 @@ window.addEventListener("load", main, false);
 
 function main() {
   //console.log(window);
-  if (!window.document.forms[0]) {
-    console.log('blah');
-  }
-  else {
-    console.log('blah2');
-    var dcform = window.document.forms[0];
-    //console.log(window.document.forms[0]);
-    for (i = 0; i < dcform.elements.length; i++) {
-      var name = dcform.elements[i].name;
-      var value = dcform.elements[i].value;
-      if (startsWith(value, '/templatedata')) {
-        //  console.log(dcform.elements[i].id + " - " + dcform.elements[i].value);
-        var windowurl = window.parent.location.href;
-        var mydiv = document.createElement('div');
-        // _newtab might be FF only
-        mydiv.innerHTML = '<a target="_newtab_'+dcform.elements[i].id+'_'+name+'" href="'+getGoToUrl(windowurl, value)+'" style="font-family: sans-serif">Open</a>';
-        document.getElementById(dcform.elements[i].id).parentNode.appendChild(mydiv);
-      }
+  if (window && window.document && window.document.forms[0]) {
+    var teamsitePathsInputs = document.evaluate("//input[starts-with(@value,'/templatedata')]", document, null, XPathResult.ANY_TYPE, null);
+    var pathInput = teamsitePaths.iterateNext();
+    while(pathInput) {
+       addOpenUrl(pathInputs);
+       pathInput = teamsitePaths.iterateNext();
     }
   }
 }
 
-function getGoToUrl(url, value) {
+function addOpenUrl(input) {
+  var mydiv = document.createElement('div');
+  mydiv.innerHTML = '<a target="_newtab_' + pathInputs.id + '_' + pathInputs.name + '" href="' + getUrl(window.parent.location.href, pathInputs.value) + '" style="font-family: sanserif">Open</a>';
+  document.getElementById(dcform.elements[i].id).parentNode.appendChild(mydiv);
+}
+
+function getUrl(url, value) {
   var newurl = url;
   var index = url.search('/templatedata');
 
