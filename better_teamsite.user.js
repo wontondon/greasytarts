@@ -1,5 +1,7 @@
 // ==UserScript==
 // @name          javatart.com's better teamsite 
+// @author        donaldlittpie
+// @version       0.7
 // @namespace     http://www.javatarts.com
 // @description   Adds links to browse to other teamsite pages. 
 // @include       http://*/iw-cc/*
