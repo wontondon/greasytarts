@@ -6,37 +6,88 @@
 // @include       https://*/iw-cc/*
 // ==/UserScript==
 //
-window.addEventListener("load", main, false);
 
-function main() {
-  //console.log(window);
+window.addEventListener('load', function() {
   if (window && window.document && window.document.forms[0]) {
-    var teamsitePathsInputs = document.evaluate("//input[starts-with(@value,'/templatedata')]", document, null, XPathResult.ANY_TYPE, null);
-    var pathInput = teamsitePaths.iterateNext();
-    while(pathInput) {
-       addOpenUrl(pathInputs);
-       pathInput = teamsitePaths.iterateNext();
+    if (window.document.forms.namedItem('dcreditForm')) {
+        wireUpExpandButtons();
+    var dcform = window.document.forms.namedItem('dcreditForm');
+    for (i = 0; i < dcform.elements.length; i++) {
+      var input = dcform.elements[i];
+      if (startsWith(input.value, '/templatedata')) {
+        addOpenUrl(input); 
+      }
     }
+    }    
+  }
+}, false);
+
+// this adds event handlers to all the expand buttons, just in case
+// there are hidden paths that are populate after clicked
+function wireUpExpandButtons() {
+  var result = document.evaluate("//img[@src='/iw-cc/datacapture/images/icn_expand.gif']", document, null, XPathResult.ANY_TIME, null);
+  var expandButton = result.iterateNext();
+  while (expandButton) {
+    expandButton.addEventListener("click", expandClick, true);
+    expandButton = result.iterateNext();
   }
 }
+
+// is there a way to make this relative to the item that clicked?
+function expandClick() {
+    var result = document.evaluate('//input', document, null, XPathResult.ANY_TYPE, null);
+    var input = result.iterateNext();
+    var inputs = [];
+    while (input) {
+      if (startsWith(input.value,'/templatedata')) {
+        inputs.push(input);
+      } 
+      input = result.iterateNext();
+    }
+
+    for (i = 0; i < inputs.length; i++) {
+      addOpenUrl(inputs[i]);
+    }
+}
+
 
 function addOpenUrl(input) {
-  var mydiv = document.createElement('div');
-  mydiv.innerHTML = '<a target="_newtab_' + pathInputs.id + '_' + pathInputs.name + '" href="' + getUrl(window.parent.location.href, pathInputs.value) + '" style="font-family: sanserif">Open</a>';
-  document.getElementById(dcform.elements[i].id).parentNode.appendChild(mydiv);
+  // check and only add once
+  if (!document.getElementById(getLinkId(input.id))) {
+    var div = document.createElement('div');
+    div.id = getLinkId(input.id);
+    div.innerHTML = '<a target="_blank" href="' + getViewUrl(window.parent.location.href, input.value) + '" class="iw-base-text-field-label">[View]</a>' +
+    '&nbsp;-&nbsp;<a target="_blank" href="' + getEditUrl(window.parent.location.href, input.value)  + '" class="iw-base-text-field-label">[Edit]</a>';
+    document.getElementById(input.id).parentNode.appendChild(div);
+  }
 }
 
-function getUrl(url, value) {
-  var newurl = url;
-  var index = url.search('/templatedata');
 
-  if (index > -1) {
-    newurl = newurl.substring(0,index) + value;  
-  }
+// maybe i should look for this on the page first?
+function getLinkId(id) {
+  return 'javatarts_' + id;
+}
 
-  return newurl;
+function getEditUrl(url, value) {
+  var areapath = document.evaluate('//input[@name="area_path"]', document, null, XPathResult.ANY_TIME, null).iterateNext().value; 
+  return getBaseUrl(url) + '/iw-cc/command/iw.group.ccpro.edit?vpath=' + areapath + encodePage(value);
+}
+
+function getViewUrl(url, value) {
+  var areapath = document.evaluate('//input[@name="area_path"]', document, null, XPathResult.ANY_TIME, null).iterateNext().value; 
+  return getBaseUrl(url) + '/iw-cc/command/iw.group.preview_file?vpath=' + areapath + encodePage(value);
+}
+
+function getBaseUrl(url) {
+  return url.substring(0,url.indexOf('/iw-cc'));
+}
+
+function encodePage(page) {
+  var lastSlash = page.lastIndexOf('/') + 1; 
+  // keeps the first part and encodes the page.  Think about why I cant just encode the whole thing...
+  return page.substring(0,lastSlash) + encodeURIComponent(page.substring(lastSlash));
 }
 
 function startsWith(str, startWith) {
-  return str.indexOf(startWith) === 0;
+  return str && str.indexOf(startWith) === 0;
 }
